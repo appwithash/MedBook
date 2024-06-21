@@ -12,10 +12,14 @@ import SwipeActions
 import SwiftData
 
 struct HomeScreenView: View {
-    @State var homeScreenViewmodel = HomeScreenViewModel()
+    @State var homeScreenViewmodel : HomeScreenViewModel
     @State var bookmarkViewmodel : BookmarkViewModel
+    @Environment(\.modelContext) private var context
+    @AppStorage(UserDefaultsKey.isLoggedIn.rawValue) var isLoggedIn = false
+    
     init(context :ModelContext){
         self._bookmarkViewmodel = State(wrappedValue: BookmarkViewModel(modelContext: context))
+        self._homeScreenViewmodel = State(wrappedValue: HomeScreenViewModel())
     }
     var body: some View {
         ScrollViewReader{reader in
@@ -29,7 +33,7 @@ struct HomeScreenView: View {
                     
                     TextFieldView(placeholder: .search, text: $homeScreenViewmodel.searchText, isSecureField: false, error: .constant(nil), isFocused: $homeScreenViewmodel.isFocused,rightImage: "xmark")
                         .onChange(of: homeScreenViewmodel.searchText){ text in
-                            if text.isEmpty == false{
+                            if homeScreenViewmodel.searchText.isEmpty == false{
                                 self.homeScreenViewmodel.fetchBooks(more: false)
                             }else{
                                 self.homeScreenViewmodel.bookList = []
@@ -99,10 +103,24 @@ struct HomeScreenView: View {
         }
         .medNavigationBar(.app_name,backIcon: backButtonStyles.none)
         .background(Color.gray.opacity(0.1))
+        .navigate(using: $homeScreenViewmodel.showBookmarkView, destination: BookMarkListView(context: context))
+        .navigate(using: $homeScreenViewmodel.showLandingView, destination: LandingPageView())
+       
+        .alert(isPresented: $homeScreenViewmodel.showLogoutAlert, content: {
+            Alert(
+                title: Text(TitleStrings.logout.localized),
+                message: Text(TitleStrings.logout_message.localized),
+                primaryButton: .default(Text(TitleStrings.no.localized)),
+                secondaryButton:  .destructive(Text(TitleStrings.yes.localized)){
+                    self.isLoggedIn = false
+                    self.homeScreenViewmodel.logout()
+                }
+            )
+        })
         .toolbar{
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
-                    
+                    self.homeScreenViewmodel.showBookmarkView = true
                 }, label: {
                     Image(systemName: "bookmark.fill")
                         .foregroundStyle(.blue)
@@ -112,12 +130,20 @@ struct HomeScreenView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
                     
+                    self.homeScreenViewmodel.showLogoutAlert = true
                 }, label: {
                     Text("Logout")
                         .bold()
                         .foregroundStyle(.red)
                 })
             }
+        }
+        .onAppear{
+            self.isLoggedIn = true
+            if self.homeScreenViewmodel.searchText.isEmpty == false{
+                self.homeScreenViewmodel.isFocused = true
+            }
+            self.bookmarkViewmodel.fetchBookmarks()
         }
     }
 }
@@ -211,6 +237,7 @@ struct BookCell : View {
         .background(Color.white)
         .shadow(color: .gray.opacity(0.2),radius: 5)
         .cornerRadius(10)
+        
     }
 }
 
@@ -233,8 +260,9 @@ extension HomeScreenView{
         private var cancellable = Set<AnyCancellable>()
         var isLoading = false
         var totalBooks = 1_000_000_000
-       
-       
+        var showBookmarkView = false
+        var showLandingView = false
+        var showLogoutAlert = false
         func fetchBooks(more : Bool){
             if self.searchText.count < 3{
                 return
@@ -310,25 +338,37 @@ extension HomeScreenView{
             }
         }
         
+        func logout(){
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                self.showLandingView = true
+            }
+            UserDefaultManager.shared.logout()
+        }
+        
        
     }
 }
 
 extension HomeScreenView {
+
     @Observable
     class BookmarkViewModel{
         var bookmarks : [BookmarkModel] = []
         var modelContext : ModelContext
         init(modelContext : ModelContext){
             self.modelContext = modelContext
-           fetchBookmarks()
         }
         func addBookmark(book : BookModel,isDelete : Bool){
             if let email = UserDefaultManager.shared.currentEmail{
                 let newBookmark = BookmarkModel(id: book.id, title: book.title, ratingAverage: book.ratingAverage, ratingsCount: book.ratingsCount, authorName: book.authorName, coverImage: book.coverImage, userEmail: email, lastModified: book.lastModified)
                 
                 if isDelete{
-                    self.modelContext.delete(newBookmark)
+                    if let bookmark = self.bookmarks.first(where: {$0.lastModified == book.lastModified}){
+                        self.modelContext.delete(bookmark)
+                    }
+                    
                     print("deleted bookmark")
                 }else{
                     self.modelContext.insert(newBookmark)

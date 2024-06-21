@@ -10,13 +10,14 @@ import SwiftUI
 struct ContentView: View {
     @State var showSplashScreen = true
     @Environment(\.modelContext) private var context
+    @AppStorage(UserDefaultsKey.isLoggedIn.rawValue) var isLoggedIn = false
     var body: some View {
         NavigationStack{
             VStack {
                 if self.showSplashScreen == true{
                     SplashScreenView()
                 }else{
-                    if UserDefaultManager.shared.isLoggedIn{
+                    if isLoggedIn{
                         HomeScreenView(context: context)
                     }else{
                         LandingPageView()

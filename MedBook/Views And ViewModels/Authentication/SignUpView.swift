@@ -47,9 +47,6 @@ struct SignUpView: View {
                                     
                                 }
                             }
-                            .onAppear{
-                                print("picker defal",viewModel.selectedCountry.country)
-                            }
                         }
                         .padding(.vertical,10)
                         .padding(.horizontal)
@@ -71,7 +68,10 @@ struct SignUpView: View {
                             self.userViewModel.addUser(user: User(email: self.authVM.email, password: self.authVM.password)){err in
                                 if err == .user_already_exist{
                                     self.authVM.emailError = err
+                                }else{
+                                    UserDefaultManager.shared.countryName = self.viewModel.selectedCountry.country
                                 }
+                                
                             }
                         }
                     }
@@ -136,7 +136,15 @@ extension SignUpView{
                     if self.countries.count == 0{
                         self.addData()
                     }else{
-                        self.fetchDefaultCountry()
+                       
+                        if UserDefaultManager.shared.countryName == ""{
+                            self.fetchDefaultCountry()
+                        }else{
+                            if let country = self.countries.first(where: {$0.country == UserDefaultManager.shared.countryName}){
+                                self.selectedCountry = country
+                            }
+                        }
+                       
                     }
                 } catch {
                     print("Fetch failed fetchCountriesFromLocalStorage")
@@ -149,8 +157,8 @@ extension SignUpView{
                         let response : CountryDataModel = try await NetworkManager.shared.fetchData(with: .default_country)
                         DispatchQueue.main.async{
                             if let country = self.countries.first(where: {$0.country == response.country}){
+                                
                                 self.selectedCountry = country
-                                print("selected country",self.selectedCountry.country)
                             }
                            
                         }
@@ -184,7 +192,7 @@ extension SignUpView{
         }
         
         
-        func addUser(user : User, completion : (ErrorStrings?) -> ()){
+        func addUser(user : User, completion : @escaping (ErrorStrings?) -> ()){
             if let databaseUser = self.users.first(where: {$0.email == user.email}){
                 completion(.user_already_exist)
                 return
@@ -195,9 +203,9 @@ extension SignUpView{
                 self.modelContext.insert(user)
                 print("Signup Success")
                 UserDefaultManager.shared.currentEmail = user.email
-                UserDefaultManager.shared.isLoggedIn = true
                 print("welcome!! \(user.email)")
                 self.showMainView = true
+                completion(nil)
             }
         }
         

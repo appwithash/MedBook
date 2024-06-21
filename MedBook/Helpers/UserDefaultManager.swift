@@ -11,7 +11,7 @@ import Combine
 class UserDefaultManager {
     
     private var userDefaults: UserDefaults
-    
+    @AppStorage(UserDefaultsKey.isLoggedIn.rawValue) var isLoggedIn = false
     static let shared = UserDefaultManager()
     
     init(userDefaults: UserDefaults = .standard) {
@@ -20,19 +20,10 @@ class UserDefaultManager {
     
     var countryName : String {
         get {
-            return userDefaults.string(forKey: UserDefaultsKey.countryName.rawValue) ?? TitleStrings.select_country.localized
+            return userDefaults.string(forKey: UserDefaultsKey.countryName.rawValue) ?? ""
         }
         set {
             userDefaults.set(newValue, forKey: UserDefaultsKey.countryName.rawValue)
-        }
-    }
-    
-    var isLoggedIn : Bool {
-        get {
-            return userDefaults.bool(forKey: UserDefaultsKey.isLoggedIn.rawValue)
-        }
-        set {
-            userDefaults.set(newValue, forKey: UserDefaultsKey.isLoggedIn.rawValue)
         }
     }
     
@@ -43,6 +34,11 @@ class UserDefaultManager {
         set {
             userDefaults.set(newValue, forKey: UserDefaultsKey.currentUser.rawValue)
         }
+    }
+    
+    func logout(){
+        UserDefaultManager.shared.isLoggedIn = false
+        UserDefaultManager.shared.currentEmail = nil
     }
 }
 

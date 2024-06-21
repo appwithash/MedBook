@@ -14,7 +14,8 @@ extension View {
         using binding: Binding<Bool>,
         destination: Destination
     ) -> some View {
-        background(NavigationLink( destination: destination,isActive: binding) { EmptyView() } )
+        background(
+            NavigationLink( destination: destination,isActive: binding) { EmptyView() } )
     }
     
     func medNavigationBar(_ title: TitleStrings, backIcon: backButtonStyles? = .chevron_left,dismiss: (()->())? = nil) -> some View {
@@ -93,5 +94,13 @@ extension Collection where Index == Int {
             return false
         }
         return itemIndex == count - 1
+    }
+}
+
+func withoutAnimation(action: @escaping () -> Void) {
+    var transaction = Transaction()
+    transaction.disablesAnimations = true
+    withTransaction(transaction) {
+        action()
     }
 }

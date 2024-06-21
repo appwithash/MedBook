@@ -13,7 +13,7 @@ struct LoginView: View {
     @Environment(\.modelContext) private var context
     
     @State private var userViewModel: UserViewModel
-    
+   
     init(modelContext: ModelContext) {
         _userViewModel = State(initialValue:  UserViewModel(modelContext: modelContext))
     }
@@ -30,7 +30,7 @@ struct LoginView: View {
                         .padding(.top,gr.size.height*0.05)
                     TextFieldView(label: .email,placeholder: .email_placeholder, text: $authVM.email,isSecureField : false, error: $authVM.emailError, isFocused: .constant(false))
                     
-                    TextFieldView(label: .password,placeholder: .new_password_placeholder, text: $authVM.password,isSecureField : false, error: $authVM.passwordError, isFocused: .constant(false))
+                    TextFieldView(label: .password,placeholder: .new_password_placeholder, text: $authVM.password,isSecureField : true, error: $authVM.passwordError, isFocused: .constant(false))
                     
                     
                     Spacer()
@@ -68,6 +68,8 @@ extension LoginView{
         var modelContext: ModelContext
         var users : [User] = []
         var showMainView = false
+       
+        
         init(modelContext: ModelContext) {
             self.modelContext = modelContext
             self.fetchUsers()
@@ -84,12 +86,12 @@ extension LoginView{
         }
         
         func login(user : User,completion : (ErrorStrings?) -> ()){
+            print("users",self.users.map{$0.email})
             if let databaseUser = self.users.first(where: {$0.email == user.email}){
                 if databaseUser.password != user.password{
                     completion(.wrong_password)
                 }else{
                     UserDefaultManager.shared.currentEmail = user.email
-                    UserDefaultManager.shared.isLoggedIn = true
                     print("welcome!! \(user.email)")
                     self.showMainView = true
                 }

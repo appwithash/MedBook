@@ -42,6 +42,7 @@ struct LandingPageView: View {
                     }
                 }
                 .padding()
+                .navigationBarBackButtonHidden()
                 .navigate(using: $showLoginScreen, destination: LoginView(modelContext: context).environmentObject(self.authVM))
                 .navigate(using: $showSignUpScreen, destination: SignUpView(modelContext: context).environmentObject(self.authVM))
             }

@@ -75,6 +75,11 @@ struct TextFieldView : View {
             .onChange(of: self.inFocus){newValue in
                 self.isFocused = newValue
             }
+            .onAppear{
+                if isFocused == true{
+                    self.inFocus = isFocused
+                }
+            }
             .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(borderColor,lineWidth: 1))
             
             if let error = error {

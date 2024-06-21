@@ -30,6 +30,11 @@ enum TitleStrings: String, Localizable {
     case home_screen
     case search
     case home_screen_msg
+    case bookmarks
+    case logout
+    case logout_message
+    case yes
+    case no
 }
 
 protocol Localizable {

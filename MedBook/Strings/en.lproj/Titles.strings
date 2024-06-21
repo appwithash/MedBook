@@ -23,5 +23,10 @@
 "login_to_continue" = "Log in to Continue";
 "welcome" = "Welcome,";
 "search" = "Search for books";
- "home_screen_msg"= "Which topic interest\nyou today?";
+"home_screen_msg"= "Which topic interest\nyou today?";
+"bookmarks" = "Bookmarks";
+"logout" = "Logout";
+"logout_message" = "Are you sure you want to logout?";
+"yes" = "Yes";
+"no" = "No";
 
