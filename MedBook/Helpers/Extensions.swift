@@ -85,3 +85,13 @@ extension String{
         return self.range(of: regex, options: .regularExpression) != nil
     }
 }
+
+
+extension Collection where Index == Int {
+    func isLastItem(_ item: Element) -> Bool {
+        guard let itemIndex = firstIndex(where: { $0 as AnyObject === item as AnyObject }) else {
+            return false
+        }
+        return itemIndex == count - 1
+    }
+}

@@ -5,3 +5,9 @@
   Created by ashutosh on 20/06/24.
   
 */
+
+
+"country_list" = "https://api.first.org/data/v1/countries";
+"book_list" = "https://openlibrary.org/search.json";
+"default_country" = "http://ip-api.com/json";
+

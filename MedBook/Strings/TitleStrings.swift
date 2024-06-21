@@ -18,7 +18,18 @@ enum TitleStrings: String, Localizable {
     case sign_up
     case app_name
     case cancel
-    
+    case select_country
+    case email
+    case password
+    case email_placeholder
+    case new_password_placeholder
+    case password_placeholder
+    case signup_to_continue
+    case login_to_continue
+    case welcome
+    case home_screen
+    case search
+    case home_screen_msg
 }
 
 protocol Localizable {

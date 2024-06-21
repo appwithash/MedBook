@@ -10,6 +10,8 @@ import SwiftUI
 struct LandingPageView: View {
     @State var showLoginScreen = false
     @State var showSignUpScreen = false
+    @ObservedObject var authVM = AuthenticationViewModel()
+    @Environment(\.modelContext) private var context
     var body: some View {
         GeometryReader{gr in
             ZStack{
@@ -27,7 +29,7 @@ struct LandingPageView: View {
                         .scaleEffect(0.8)
                     
                     Spacer()
-                    HStack{
+                    VStack{
                         Button(TitleStrings.log_in.localized){
                             self.showLoginScreen = true
                         }
@@ -40,15 +42,16 @@ struct LandingPageView: View {
                     }
                 }
                 .padding()
-                .navigate(using: $showLoginScreen, destination: LoginView())
-                .navigate(using: $showSignUpScreen, destination: SignUpView())
+                .navigate(using: $showLoginScreen, destination: LoginView(modelContext: context).environmentObject(self.authVM))
+                .navigate(using: $showSignUpScreen, destination: SignUpView(modelContext: context).environmentObject(self.authVM))
             }
+            
         }
     }
 }
 
 #Preview {
     NavigationView{
-        LandingPageView()
+        LandingPageView(authVM: AuthenticationViewModel())
     }
 }

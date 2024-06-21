@@ -10,4 +10,18 @@
 "log_in" = "Log In";
 "sign_up" = "Sign Up";
 "app_name" = "MedBook";
+"cancel" = "Cancel";
+"home_screen" = "Home Screen";
+
+"select_country" = "Select Country";
+"password" = "Password";
+"email" = "Email";
+"email_placeholder" = "Enter email address";
+"new_password_placeholder" = "Enter new password";
+"password_placeholder" = "Enter password";
+"signup_to_continue" = "Sign Up to Continue";
+"login_to_continue" = "Log in to Continue";
+"welcome" = "Welcome,";
+"search" = "Search for books";
+ "home_screen_msg"= "Which topic interest\nyou today?";
 

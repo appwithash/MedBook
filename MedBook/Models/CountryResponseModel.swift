@@ -15,7 +15,7 @@ struct CountryResponseDataModel: Codable {
     let total: Int
     let offset: Int
     let limit: Int
-    let data: [String: CountryModel]
+    let data: [String: CountryDataModel]
     
     enum CodingKeys: String, CodingKey {
         case status
@@ -29,7 +29,10 @@ struct CountryResponseDataModel: Codable {
     }
 }
 
-struct CountryModel: Codable {
+struct CountryDataModel: Codable,Identifiable, Hashable {
     let country: String
     let region: String
+    var id : String{
+        return country
+    }
 }

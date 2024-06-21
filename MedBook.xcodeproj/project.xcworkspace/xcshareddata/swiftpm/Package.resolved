@@ -1,0 +1,24 @@
+{
+  "originHash" : "6b7f4780591ebc4daa30eaba29c36827473215ea99ace92681535cbf0919fb90",
+  "pins" : [
+    {
+      "identity" : "ihprogresshud",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Swiftify-Corp/IHProgressHUD.git",
+      "state" : {
+        "revision" : "c3e0cf90ba1b310073e841de7dc6ef0a2d4899e2",
+        "version" : "0.1.8"
+      }
+    },
+    {
+      "identity" : "swipeactions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aheze/SwipeActions",
+      "state" : {
+        "revision" : "41e6f6dce02d8cfa164f8c5461a41340850ca3ab",
+        "version" : "1.1.0"
+      }
+    }
+  ],
+  "version" : 3
+}

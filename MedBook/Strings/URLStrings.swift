@@ -13,4 +13,6 @@ enum URLStrings: String, Localizable {
     }
     
     case country_list
+    case book_list
+    case default_country
 }

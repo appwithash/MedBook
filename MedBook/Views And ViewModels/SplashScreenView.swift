@@ -12,11 +12,19 @@ struct SplashScreenView: View {
         ZStack{
             Color
                 .blue.ignoresSafeArea()
-            
-            Text(TitleStrings.app_name.localized)
-                .font(.largeTitle)
-                .bold()
-                .foregroundStyle(.white)
+            VStack{
+                Text(TitleStrings.app_name.localized)
+                    .font(.largeTitle)
+                    .bold()
+                    .foregroundStyle(.white)
+                
+                Image(.logo)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .scaleEffect(0.8)
+                    .foregroundStyle(.white)
+                
+            }
         }
     }
 }

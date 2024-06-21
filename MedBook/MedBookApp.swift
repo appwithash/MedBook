@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct MedBookApp: App {
@@ -13,5 +14,7 @@ struct MedBookApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for:[CountryModel.self, User.self, BookmarkModel.self])
+       
     }
 }

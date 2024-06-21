@@ -5,3 +5,21 @@
   Created by ashutosh on 20/06/24.
   
 */
+
+
+"email_empty_error" = "Please enter email";
+"email_invalid_error" = "Please enter a valid email address";
+
+
+"password_empty_error" = "Please enter password";
+"password_special_character_error" = "Password should contain atlease a special character";
+"password_uppercase_character_error" =  "Password should contain atlease an uppercase character";
+"password_number_character_error" =  "Password should contain atlease a numberic character";
+"password_length_error" = "Password should be of minimum of 8 characters";
+
+"no_country_selected_error" = "Please select a country";
+
+"user_not_exist" = "No account exist with this email address";
+"user_already_exist" = "Already have an account with this email";
+
+"wrong_password" = "Incorrect Password, please try again.";

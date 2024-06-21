@@ -8,14 +8,27 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var showSplashScreen = true
+    @Environment(\.modelContext) private var context
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack{
+            VStack {
+                if self.showSplashScreen == true{
+                    SplashScreenView()
+                }else{
+                    if UserDefaultManager.shared.isLoggedIn{
+                        HomeScreenView(context: context)
+                    }else{
+                        LandingPageView()
+                    }
+                }
+            }
+            .onAppear{
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+                    self.showSplashScreen = false
+                }
+            }
         }
-        .padding()
     }
 }
 

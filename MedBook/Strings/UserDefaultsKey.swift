@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+
+enum UserDefaultsKey : String{
+    case countryName = "country_name"
+    case isLoggedIn = "is_logged_in"
+    case currentUser = "current_user"
+}
