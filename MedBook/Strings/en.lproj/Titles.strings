@@ -1,0 +1,13 @@
+/* 
+  TitleStrings.strings
+  MedBook
+
+  Created by ashutosh on 20/06/24.
+  
+*/
+
+
+"log_in" = "Log In";
+"sign_up" = "Sign Up";
+"app_name" = "MedBook";
+
