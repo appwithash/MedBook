@@ -12,24 +12,28 @@ struct ContentView: View {
     @Environment(\.modelContext) private var context
     @AppStorage(UserDefaultsKey.isLoggedIn.rawValue) var isLoggedIn = false
     var body: some View {
-        NavigationStack{
-            VStack {
-                if self.showSplashScreen == true{
-                    SplashScreenView()
-                }else{
-                    if isLoggedIn{
+       
+        VStack {
+            if self.showSplashScreen == true{
+                SplashScreenView()
+            }else{
+                if isLoggedIn{
+                    NavigationStack{
                         HomeScreenView(context: context)
-                    }else{
+                    }
+                }else{
+                    NavigationStack{
                         LandingPageView()
                     }
                 }
             }
-            .onAppear{
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
-                    self.showSplashScreen = false
-                }
+        }
+        .onAppear{
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+                self.showSplashScreen = false
             }
         }
+        
     }
 }
 

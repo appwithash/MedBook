@@ -125,8 +125,9 @@ struct HomeScreenView: View {
                 message: Text(TitleStrings.logout_message.localized),
                 primaryButton: .default(Text(TitleStrings.no.localized)),
                 secondaryButton:  .destructive(Text(TitleStrings.yes.localized)){
-                    self.isLoggedIn = false
+                    
                     self.homeScreenViewmodel.logout()
+                    self.isLoggedIn = false
                 }
             )
         })
