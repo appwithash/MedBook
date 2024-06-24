@@ -33,10 +33,15 @@ struct HomeScreenView: View {
                     
                     TextFieldView(placeholder: .search, text: $homeScreenViewmodel.searchText, isSecureField: false, error: .constant(nil), isFocused: $homeScreenViewmodel.isFocused,rightImage: "xmark")
                         .onChange(of: homeScreenViewmodel.searchText){ text in
-                            if homeScreenViewmodel.searchText.isEmpty == false{
+                            if homeScreenViewmodel.searchText.count >= 3{
+                                self.homeScreenViewmodel.cancelTask()
                                 self.homeScreenViewmodel.fetchBooks(more: false)
                             }else{
+                                self.homeScreenViewmodel.showPlaceholder = false
+                                self.homeScreenViewmodel.cancelTask()
+                                self.homeScreenViewmodel.showMoreLoader = false
                                 self.homeScreenViewmodel.bookList = []
+                               
                             }
                         }
                     if homeScreenViewmodel.isFocused == true{
@@ -57,34 +62,42 @@ struct HomeScreenView: View {
                         .onChange(of: self.homeScreenViewmodel.selectedSortType){newvalue in
                             self.homeScreenViewmodel.sortBooks()
                         }
-                        
-                        ForEach(self.homeScreenViewmodel.bookList){book in
-                                SwipeView{
-                                    BookCell(book: book)
-                                        .background(
-                                            GeometryReader { geo in
-                                                Color.clear
-                                                    .onAppear {
+                        if self.homeScreenViewmodel.noSearchResultFound == true{
+                            HStack{
+                                Spacer()
+                                Text("No book found with title - \"\(self.homeScreenViewmodel.searchText)\"")
+                                    .multilineTextAlignment(.center)
+                                    .font(.title2)
+                                Spacer()
+                            }
+                        }else{
+                            if self.homeScreenViewmodel.showPlaceholder{
+                                ForEach(1...10,id:\.self){_ in
+                                    BookCell(book: BookModel(title: "", lastModified: 0),urlString : "", image: "bookmark", action: {})
+                                        .redacted(reason: .placeholder)
+                                }
+                            }else{
+                                ForEach(self.homeScreenViewmodel.bookList){book in
+                                    //                                SwipeView{
+                                    BookCell(book: book,urlString : book.coverImageURl,image: self.bookmarkViewmodel.bookmarks.contains(where:{$0.lastModified == book.lastModified}) ? "bookmark.fill" : "bookmark",action: {
+                                        self.bookmarkViewmodel.addBookmark(book : book,isDelete: self.bookmarkViewmodel.bookmarks.contains(where:{$0.lastModified == book.lastModified}))
+                                    })
+                                    .background(
+                                        GeometryReader { geo in
+                                            Color.clear
+                                                .onChange(of: geo.frame(in: .global).maxY) { maxY in
+                                                    if let lastBook = self.homeScreenViewmodel.bookList.last, lastBook.id == book.id{
                                                         
-                                                    }
-                                                    .onChange(of: geo.frame(in: .global).maxY) { maxY in
-                                                        if let lastBook = self.homeScreenViewmodel.bookList.last, lastBook.id == book.id{
-                                                            
-                                                            if maxY < UIScreen.main.bounds.height {
-                                                                self.homeScreenViewmodel.fetchBooks(more: true)
-                                                            }
+                                                        if maxY < UIScreen.main.bounds.height {
+                                                            self.homeScreenViewmodel.fetchBooks(more: true)
                                                         }
                                                     }
-                                            }
-                                        )
-                                } trailingActions: { _ in
-                                   
-                                    SwipeAction(systemImage: self.bookmarkViewmodel.bookmarks.contains(where:{$0.lastModified == book.lastModified}) ? "bookmark.fill" : "bookmark",backgroundColor: Color.blue) {
-                                        self.bookmarkViewmodel.addBookmark(book : book,isDelete: self.bookmarkViewmodel.bookmarks.contains(where:{$0.lastModified == book.lastModified}))
-                                    }
-                                    .foregroundStyle(.white)
-                                    
+                                                }
+                                        }
+                                    )
                                 }
+                            }
+                       
                         }
                          
                         if self.homeScreenViewmodel.showMoreLoader{
@@ -169,76 +182,184 @@ struct SortCell : View {
 
 struct BookCell : View {
     var book : BookModel
+    @Environment(\.colorScheme) var colorScheme
+    @State var viewModel : ImageCacheManager
+    @State var pastShown = false
+    var image : String
+    var action : () -> ()
+    init(book: BookModel, urlString: String,image : String, action : @escaping () -> ()) {
+        self.book = book
+        self._viewModel = State(wrappedValue: ImageCacheManager(url: urlString))
+        self.action = action
+        self.image = image
+    }
+    
+    @State var offset: CGFloat = 0
     var body: some View {
-        HStack{
-            ZStack{
-                Color(.systemGray5)
-                AsyncImage(url: URL(string: book.coverImageURl)!) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                            .frame(width: 50, height: 50)
-                    case .success(let image):
-                        image
+        ZStack{
+            Color.blue
+                .overlay(alignment:.trailing,content: {
+                    Image(systemName: image)
+                        .font(.system(size: 20))
+                        .padding(.horizontal,25)
+                })
+                .foregroundStyle(.white)
+                .onTapGesture {
+                    self.action()
+                    withAnimation(.spring) {
+                        offset = 0
+                    }
+                }
+            
+            HStack{
+                ZStack{
+                    if colorScheme == .dark {
+                        Color(.systemGray2)
+                    }else{
+                        Color(.systemGray5)
+                    }
+                    if let image = viewModel.image{
+                        Image(uiImage: image)
                             .resizable()
                             .frame(width: 50, height: 50)
                             .scaledToFill()
                             .presentationCornerRadius(10)
-                    case .failure(_):
-                        if book.coverImageURl == book.nullUrl{
-                            Image(systemName: "book")
-                                .frame(width: 50, height: 50)
-                        }else{
+                    }else{
+                        if let url = URL(string: viewModel.url){
                             ProgressView()
                                 .frame(width: 50, height: 50)
-                               
+                                .onAppear {
+                                    viewModel.load()
+                                }
+                        }else{
+                            Image(systemName: "book")
+                                .frame(width: 50, height: 50)
                         }
-                    @unknown default:
-                        ProgressView()
-                            .frame(width: 50, height: 50)
+                        
+                    }
+                    
+                }
+                .frame(width: 50, height: 50)
+                .cornerRadius(10)
+                
+                VStack(alignment: .leading){
+                    Text(book.title)
+                        .lineLimit(1)
+                        .font(.body)
+                        .fontWeight(.semibold)
+                    HStack{
+                        Text(book.authorName?.joined(separator: ", ") ?? "")
+                            .lineLimit(1)
+                            .foregroundStyle(colorScheme == .dark ? Color(.white).opacity(0.8) : Color(.systemGray3))
+                        Spacer()
+                        
+                        HStack(spacing: 5){
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.yellow)
+                            Text("\(String(format: "%.1f", book.ratingAverage ?? 0.0))")
+                                .font(.system(size: 14))
+                        }
+                        
+                        HStack(spacing: 5){
+                            Image(systemName: "appwindow.swipe.rectangle")
+                                .foregroundStyle(.yellow)
+                            Text("\(book.ratingsCount ?? 0)")
+                                .font(.system(size: 14))
+                        }
+                        .padding(.leading,5)
                     }
                 }
                 
             }
-            .frame(width: 50, height: 50)
+            .padding(.vertical,12)
+            .padding(.horizontal,10)
+            .background(Color("bg"))
             .cornerRadius(10)
-            
-            VStack(alignment: .leading){
-                Text(book.title)
-                    .lineLimit(1)
-                    .font(.body)
-                    .fontWeight(.semibold)
-                HStack{
-                    Text(book.authorName?.joined(separator: ", ") ?? "")
-                        .lineLimit(1)
-                        .foregroundStyle(Color(.systemGray4))
-                    Spacer()
-                    
-                    HStack(spacing: 5){
-                        Image(systemName: "star.fill")
-                            .foregroundStyle(.yellow)
-                        Text("\(String(format: "%.1f", book.ratingAverage ?? 0.0))")
-                            .font(.system(size: 14))
-                    }
-                    
-                    HStack(spacing: 5){
-                        Image(systemName: "appwindow.swipe.rectangle")
-                            .foregroundStyle(.yellow)
-                        Text("\(book.ratingsCount ?? 0)")
-                            .font(.system(size: 14))
-                    }
-                    .padding(.leading,5)
-                }
-            }
-            
+            .offset(x: offset)
+            .gesture(
+                DragGesture()
+                    .onChanged({ value in
+                        withAnimation(.spring) {
+                            if value.translation.width < 0 && value.translation.width >= -100 {
+                                offset = value.translation.width
+                            }else if value.translation.width > 0{
+                                offset = 0
+                            }
+                        }
+                    })
+                    .onEnded({ value in
+                        if value.translation.width < -80{
+                            withAnimation(.spring) {
+                                offset = -70
+                            }
+                        }else if  value.translation.width > 0{
+                            withAnimation(.spring) {
+                                offset = 0
+                            }
+                        }else{
+                            withAnimation(.spring) {
+                                offset = 0
+                            }
+                        }
+                    })
+            )
         }
-        .padding(.vertical,12)
-        .padding(.horizontal,10)
-        .background(Color.white)
+        .frame(maxWidth: .infinity)
         .shadow(color: .gray.opacity(0.2),radius: 5)
         .cornerRadius(10)
-        
+
     }
+}
+
+
+extension BookCell{
+    @Observable
+    class ImageCacheManager {
+        var image: UIImage?
+
+        private var cancellable: AnyCancellable?
+        let url: String
+        private let cacheDirectory: URL
+
+        init(url: String) {
+         
+            self.url = url
+
+            // Define the cache directory path
+            let fileManager = FileManager.default
+            if let cacheDirectory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first {
+                self.cacheDirectory = cacheDirectory
+            } else {
+                self.cacheDirectory = fileManager.temporaryDirectory
+            }
+        }
+
+        func load() {
+            guard let url = URL(string: self.url) else {return}
+           
+            let cacheFileURL = cacheDirectory.appendingPathComponent(url.lastPathComponent)
+
+            if let cachedImage = UIImage(contentsOfFile: cacheFileURL.path) {
+                self.image = cachedImage
+            } else {
+                cancellable = URLSession.shared.dataTaskPublisher(for: url)
+                    .map { UIImage(data: $0.data) }
+                    .replaceError(with: nil)
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] downloadedImage in
+                        guard let self = self, let image = downloadedImage else { return }
+                        self.image = image
+                        self.saveToCache(image: image, url: cacheFileURL)
+                    }
+            }
+        }
+
+        private func saveToCache(image: UIImage, url: URL) {
+            guard let data = image.pngData() else { return }
+            try? data.write(to: url)
+        }
+    }
+
 }
 
 enum SortType : String,CaseIterable{
@@ -263,15 +384,20 @@ extension HomeScreenView{
         var showBookmarkView = false
         var showLandingView = false
         var showLogoutAlert = false
+        var showPlaceholder = false
+        private var currentTask: Task<Void, Never>?
+        var noSearchResultFound = false
         func fetchBooks(more : Bool){
             if self.searchText.count < 3{
                 return
             }
-            
-            if self.isLoading == true{
+           
+            if more == true && self.isLoading == true{
                 return
             }
+            
             self.isLoading = true
+            
             if more{
                 offset += 1
                 self.showMoreLoader = true
@@ -280,17 +406,15 @@ extension HomeScreenView{
                     return
                 }
             }else{
+                self.showPlaceholder = true
                 self.bookList = []
                 offset = 0
                 totalBooks = 1_000_000_000
                 self.showMoreLoader = false
-                IHProgressHUD.show(withStatus: "Fetching books...")
+               
             }
-            
-            
-          
-            print("fetchBooks called",offset)
-            Task{
+            self.noSearchResultFound = false
+            currentTask = Task{
                 do{
                     let response : BookResponseModel = try await NetworkManager.shared.fetchDataWithParameters(from: .book_list,queryParams: [
                         "title":self.searchText,
@@ -300,15 +424,40 @@ extension HomeScreenView{
                     
                     DispatchQueue.main.async {[weak self] in
                         guard let self = self else { return }
-                        self.totalBooks = response.numFound
-                        self.bookList.append(contentsOf: response.docs)
+                        
+                        if self.searchText.isEmpty {
+                            self.bookList = []
+                            self.totalBooks = 0
+                        }else{
+                            self.totalBooks = response.numFound
+                            for book in response.docs{
+                                if self.bookList.contains(where: {$0.lastModified == book.lastModified}) == false{
+                                    self.bookList.append(book)
+                                }
+                                self.sortBooks()
+                            }
+                            if self.bookList.isEmpty{
+                                self.noSearchResultFound = true
+                            }else{
+                                self.noSearchResultFound = false
+                            }
+                            print("\nbooklist",response.docs.map({$0.title}))
+                            print("\n=========================================\n")
+                          
+                        }
                         self.isLoading = false
-                        self.sortBooks()
-                        IHProgressHUD.dismiss()
+                        self.showPlaceholder = false
                     }
                 }catch let err{
-                    print("fetchingBookError",String(describing: err))
-                    await IHProgressHUD.dismiss()
+                    if err.localizedDescription == "cancelled"{
+                        print("fetchBooks task was cancelled")
+                    } else {
+                        print("fetchingBookError",String(describing: err))
+                        
+                        self.isLoading = false
+                        self.showPlaceholder = false
+                    }
+                    
                 }
             }
         }
@@ -341,12 +490,15 @@ extension HomeScreenView{
         func logout(){
             var transaction = Transaction()
             transaction.disablesAnimations = true
-            withTransaction(transaction) {
-                self.showLandingView = true
-            }
+//            withTransaction(transaction) {
+//                self.showLandingView = true
+//            }
             UserDefaultManager.shared.logout()
         }
         
+        func cancelTask(){
+            self.currentTask?.cancel()
+        }
        
     }
 }
@@ -357,8 +509,10 @@ extension HomeScreenView {
     class BookmarkViewModel{
         var bookmarks : [BookmarkModel] = []
         var modelContext : ModelContext
+        private var cancellable = Set<AnyCancellable>()
         init(modelContext : ModelContext){
             self.modelContext = modelContext
+           
         }
         func addBookmark(book : BookModel,isDelete : Bool){
             if let email = UserDefaultManager.shared.currentEmail{

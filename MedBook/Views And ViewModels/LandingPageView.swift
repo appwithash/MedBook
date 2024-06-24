@@ -20,7 +20,7 @@ struct LandingPageView: View {
                     Text(TitleStrings.app_name.localized)
                         .font(.largeTitle)
                         .bold()
-                        .foregroundStyle(.black)
+                       
                    
                     Image(.logo)
                         .resizable()

@@ -34,6 +34,17 @@ struct SignUpView: View {
                     TextFieldView(label: .email,placeholder: .email_placeholder, text: $authVM.email,isSecureField : false, error: $authVM.emailError, isFocused: .constant(false))
                     
                     TextFieldView(label: .password,placeholder: .new_password_placeholder, text: $authVM.password,isSecureField : true, error: $authVM.passwordError, isFocused: .constant(false))
+                    if self.authVM.password.isEmpty == false{
+                        VStack(alignment: .leading,spacing: 5){
+                            PasswordHintView(name: PasswordValidation.passwordLength, isSatisfied: self.authVM.password.count >= 8)
+                            PasswordHintView(name: PasswordValidation.uppercase, isSatisfied: self.authVM.password.contains(where: {$0.isUppercase}))
+                            PasswordHintView(name: PasswordValidation.number, isSatisfied:  self.authVM.password.contains(where: {$0.isNumber}))
+                            PasswordHintView(name: PasswordValidation.special, isSatisfied: self.authVM.password.containsSpecialCharacters)
+                        }
+                    }
+                    VStack{
+                        Text("")
+                    }
                     VStack(alignment: .leading,spacing: 5){
                         HStack{
                             Text(TitleStrings.select_country.localized)
@@ -93,6 +104,7 @@ struct SignUpView: View {
         }
     }
 }
+
 
 extension SignUpView{
     @Observable
@@ -212,7 +224,32 @@ extension SignUpView{
         
        
     }
+    
 }
+
+struct PasswordHintView : View {
+    var name : PasswordValidation
+    var isSatisfied : Bool
+    var body: some View {
+        HStack{
+            ZStack{
+                if isSatisfied{
+                    Image(systemName: "checkmark")
+                        .resizable()
+                        .scaledToFit()
+                }else{
+                    Circle()
+                        .frame(width: 10,height: 10)
+                }
+            }
+            .frame(width: 10,height: 10)
+            Text(name.rawValue)
+                .font(.system(size: 12))
+        }
+        .foregroundStyle(isSatisfied ? .green : .gray)
+    }
+}
+
 //#Preview {
 //    NavigationView{
 //        SignUpView(modelContext: ModelContext(ModelContainer(for: CountryModel.self)))

@@ -21,16 +21,11 @@ struct BookMarkListView: View {
         VStack{
             ScrollView(showsIndicators:false){
                 ForEach(self.bookmarkViewmodel.bookList){ book in
-                    SwipeView{
-                        BookCell(book: book)
-                    } trailingActions: { _ in
-                        
-                        SwipeAction(systemImage: self.bookmarkViewmodel.bookmarks.contains(where:{$0.lastModified == book.lastModified}) ? "bookmark.fill" : "bookmark",backgroundColor: Color.blue) {
-                            self.bookmarkViewmodel.addBookmark(book : book,isDelete: self.bookmarkViewmodel.bookmarks.contains(where:{$0.lastModified == book.lastModified}))
-                        }
-                        .foregroundStyle(.white)
-                        
-                    }
+                   
+                    BookCell(book: book, urlString: book.coverImageURl,image: self.bookmarkViewmodel.bookmarks.contains(where:{$0.lastModified == book.lastModified}) ? "bookmark.fill" : "bookmark", action: {
+                        self.bookmarkViewmodel.addBookmark(book : book,isDelete: self.bookmarkViewmodel.bookmarks.contains(where:{$0.lastModified == book.lastModified}))
+                    })
+                    
                 }
                 .padding(.top)
                 .padding(.horizontal)

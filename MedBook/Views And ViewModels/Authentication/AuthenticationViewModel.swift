@@ -101,5 +101,19 @@ class AuthenticationViewModel : ObservableObject{
         }
     }
     
+   
+
     
+}
+
+
+enum PasswordValidation : String, Identifiable, CaseIterable{
+    var id: String{
+        self.rawValue
+    }
+    case passwordLength = "Password should contain minimum 8 characters"
+    case uppercase = "Password should contain minimum 1 uppercase character"
+    case number = "Password should contain minimum 1 numeric character"
+    case special = "Password should contain minimum 1 special character"
+   
 }

@@ -45,7 +45,7 @@ class NetworkManager {
         }
 
         let urlRequest = URLRequest(url: url)
-        print("url",urlRequest)
+        print("booklist url",urlRequest)
         do {
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
            

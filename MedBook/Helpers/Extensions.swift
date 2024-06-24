@@ -30,7 +30,7 @@ struct MEDNavigationBar: ViewModifier {
     var dismiss: (()->(Void))?
     var heading: String
     var backImage: String?
-    
+    @Environment(\.colorScheme) var colorScheme
     init(dismiss: (() -> (Void))? = nil, heading: String, backIcon: backButtonStyles? = backButtonStyles.chevron_left) {
         self.dismiss = dismiss
         self.heading = heading
@@ -50,7 +50,7 @@ struct MEDNavigationBar: ViewModifier {
                         Button(action: dismiss ?? dismissPresentationMode) {
                             Image(systemName: backImage ?? "") 
                                 .font(.system(size: 12))
-                                .foregroundColor(.black)
+                                .foregroundColor(self.colorScheme == .dark ? .white : .black)
                         }
                     }
                 }

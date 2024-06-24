@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SplashScreenView: View {
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         ZStack{
             Color
@@ -16,13 +17,13 @@ struct SplashScreenView: View {
                 Text(TitleStrings.app_name.localized)
                     .font(.largeTitle)
                     .bold()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(colorScheme == .dark ? .black : .white)
                 
                 Image(.logo)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .scaleEffect(0.8)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(colorScheme == .dark ? .black : .white)
                 
             }
         }

@@ -35,6 +35,7 @@ enum TitleStrings: String, Localizable {
     case logout_message
     case yes
     case no
+    
 }
 
 protocol Localizable {
